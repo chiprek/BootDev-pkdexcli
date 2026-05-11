@@ -5,18 +5,20 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/chiprek/BootDev-pkdexcli/internal/pokeapi"
 )
+
+type config struct {
+	pokeapiClient    pokeapi.Client
+	nextLocationsURL *string
+	prevLocationsURL *string
+}
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
-}
-
-func commandExit() error {
-	fmt.Print("Closing the Pokedex... Goodbye!")
-	os.Exit(0)
-	return nil
+	callback    func(*config) error
 }
 
 func cleanInput(text string) []string {
@@ -32,10 +34,25 @@ func getCommands() map[string]cliCommand {
 			description: "exit the pokedex",
 			callback:    commandExit,
 		},
+		"help": {
+			name:        "help",
+			description: "shows the list of commands and their discription",
+			callback:    commandHelp,
+		},
+		"map": {
+			name:        "map",
+			description: "Get the next page of locations",
+			callback:    commandMapf,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Get the previous page of locations",
+			callback:    commandMapb,
+		},
 	}
 }
 
-func startRepl() {
+func startRepl(cfg *config) {
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
@@ -48,12 +65,17 @@ func startRepl() {
 
 		commandName := input[0]
 
-		res, ok := getCommands()[commandName]
-		if !ok {
-			fmt.Println("not a comand.")
-		}
+		command, ok := getCommands()[commandName]
 
-		res.callback()
+		if ok {
+			err := command.callback(cfg)
+			if err != nil {
+				fmt.Println(err)
+			}
+			continue
+		} else {
+			fmt.Println("Unknown command")
+		}
 
 	}
 }

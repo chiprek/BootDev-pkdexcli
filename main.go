@@ -1,6 +1,16 @@
 package main
 
-func main() {
+import (
+	"time"
 
-	startRepl()
+	"github.com/chiprek/BootDev-pkdexcli/internal/pokeapi"
+)
+
+func main() {
+	pokeClient := pokeapi.NewClient(5 * time.Second)
+	cfg := &config{
+		pokeapiClient: pokeClient,
+	}
+
+	startRepl(cfg)
 }
