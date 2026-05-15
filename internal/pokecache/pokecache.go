@@ -15,7 +15,7 @@ type enteriesCache struct {
 	cache map[string]cacheEntry
 }
 
-type cache interface {
+type Cache interface {
 	Get(key string) ([]byte, bool)
 	Add(key string, value []byte) error
 	reapLoop(interval time.Duration)
@@ -52,7 +52,7 @@ func (c *enteriesCache) reapLoop(interval time.Duration) {
 	}
 }
 
-func NewCache(interval time.Duration) cache {
+func NewCache(interval time.Duration) Cache {
 	mu := &sync.RWMutex{}
 	cache := &enteriesCache{
 		cache: make(map[string]cacheEntry),
